@@ -1,0 +1,10 @@
+{ 
+   "channels": [
+       {"file": "foo.c", "name": "FOO"},
+       {"file": "bar.c", "name": "BAR"}
+   ],
+   "messages": [
+       {"file": "foo.c", "line": 10, "channel": "FOO",
+        "msg": "foo: i: {}", "parameters": ["i"]}
+    ]
+}
