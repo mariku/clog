@@ -22,12 +22,14 @@ typedef struct {
     LogMessage messages[NUMBER_OF_MESSAGES]; 
     int read;
     int write;
+    int count;
 }LogChannel;
 
 void Logging_log(LogChannel* channel, int line_number, int par1, int par2);
 void Logging_init(LogChannel* channel);
 
 void Logging_log_callback(int line, int par1, int par2);
+void Logging_lost_callback(LogChannel* channel, int lost);
 
 void Logging_dump(LogChannel* channel);
 
