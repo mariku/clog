@@ -1,6 +1,7 @@
 #include "log.h"
 
-void Logging_init(LogChannel* channel) {
+void Logging_init(LogChannel* channel, int id) {
+    channel->id = id;
     channel->read = 0;
     channel->write = 0;
     channel->count = 0;
@@ -10,7 +11,7 @@ void Logging_log(LogChannel* channel, int line,
                  int par1, int par2) {
 
     /* 
-       if the buffer is full
+       if buffer is full
        move read cursor to next position 
     */
     if(channel->read == channel->write && channel->count) {
@@ -67,13 +68,13 @@ void Logging_dump(LogChannel* channel) {
         if(channel->read == NUMBER_OF_MESSAGES) {
             channel->read = 0;
         }
-        Logging_log_callback(m->line, m->par1, m->par2);
+        Logging_log_callback(channel->id, m->line, m->par1, m->par2);
     }
     channel->read = 0;
     channel->write = 0;
     channel->count = 0;
 
     if(lost != 0) {
-        Logging_lost_callback(channel, lost);
+        Logging_lost_callback(channel->id, lost);
     }
 }
