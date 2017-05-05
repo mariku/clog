@@ -1,4 +1,4 @@
-#include "log.h"
+#include "logging.h"
 #include <stdio.h>
 
 void do_foo();
@@ -13,8 +13,8 @@ void Logging_dump_all() {
 }
 
 void Logging_init_all() {
-    Logging_init(&FOO, 0);
-    Logging_init(&BAR, 1);
+    Logging_init(&FOO, 1);
+    Logging_init(&BAR, 2);
 }
 
 int main()
@@ -27,9 +27,9 @@ int main()
 }
 
 void Logging_log_callback(int id, int line, int par1, int par2) {
-    printf("log: %d, %d, %d, %d\n", id, line, par1, par2);
+    printf("%d,%d,%d,%d\n", id, line, par1, par2);
 }
 
 void Logging_lost_callback(int channel_id, int lost) {
-    printf("Messages lost: %d\n", lost);
+    printf("0,0,%d,%d\n", channel_id, lost);
 }

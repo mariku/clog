@@ -1,4 +1,4 @@
-#include "log.h"
+#include "logging.h"
 
 void Logging_init(LogChannel* channel, int id) {
     channel->id = id;

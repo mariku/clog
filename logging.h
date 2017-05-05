@@ -1,7 +1,7 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include "log_cfg.h"
+#include "logging_cfg.h"
 #if (LOGGING==1)
 
 typedef enum {
@@ -47,8 +47,8 @@ void Logging_dump(LogChannel* channel);
 
 #define LOGGING_CREATE_CHANNEL(name) --- channel: name ---
 #define LOGGING_DEBUG_0(channel, msg) --- debug: channel, __LINE__, msg ---
-#define LOGGING_DEBUG_1(channel, msg, par1) --- debug: channel, msg, __LINE__, par1 ---
-#define LOGGING_DEBUG_2(channel, msg, par1, par2) --- debug(channel, __LINE__, msg, par1, par2 ---
+#define LOGGING_DEBUG_1(channel, msg, par1) --- debug: channel, __LINE__, msg, par1 ---
+#define LOGGING_DEBUG_2(channel, msg, par1, par2) --- debug: channel, __LINE__, msg, par1, par2 ---
 
 #else
 
