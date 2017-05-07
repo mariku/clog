@@ -14,20 +14,29 @@ def cli():
 
 template = jinja2.Template("""
 #include <stdio.h>
-#include "munit.h"
+#include "unittest.h"
 
-int tests_run = 0;
 /* test functions declarations */
 {% for i in functions -%}
 char* {{i}}(void);
 {% endfor %}
 
+extern int test_run = 0;
+
 /* execute all tests */
 static char * all_tests() {
+    char* msg;
 {% for i in functions %}
     printf("starting test {{i}}\\n");
-    mu_run_test({{i}});
-    printf("finished test {{i}}\\n");
+    test_run++;
+    msg = {{i}}();
+    if(msg) {
+        printf("finished test {{i}} FAILED\\n");
+        return msg;
+    }
+    else{
+        printf("finished test {{i}} SUCCEDED\\n");
+    }
 {% endfor %}
     return 0;
 }
@@ -41,12 +50,13 @@ int main(int argc, char **argv) {
     else {
         printf("ALL TESTS PASSED\\n");
     }
-    printf("Tests run: %d\\n", tests_run);
     return result != 0;
+    printf("Tests run: %d\\n", test_run);
 }
 """)
 
 #------------------------------------------------------------------------------
+
 
 @cli.command()
 @click.option('--input-file')
@@ -65,7 +75,8 @@ def get_functions(xml):
     with open(xml) as f:
         root = etree.parse(f)
     return [i.find('name').text for i in root.iterfind('.//member')
-            if i.get('kind') == 'function']
+            if i.get('kind') == 'function'
+            if i.find('name').text.startswith("test")]
 
 
 #------------------------------------------------------------------------------

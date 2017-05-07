@@ -10,6 +10,8 @@ void Logging_init(LogChannel* channel, int id) {
 void Logging_log(LogChannel* channel, int line, 
                  int par1, int par2) {
 
+    LogMessage* m = &channel->messages[channel->write];
+
     /* 
        if buffer is full
        move read cursor to next position 
@@ -20,8 +22,6 @@ void Logging_log(LogChannel* channel, int line,
             channel->read = 0;
         }
     }
-
-    LogMessage* m = &channel->messages[channel->write];
     m->line = line;
     m->par1 = par1;
     m->par2 = par2;
@@ -30,6 +30,7 @@ void Logging_log(LogChannel* channel, int line,
     if(channel->write == NUMBER_OF_MESSAGES) {
         channel->write = 0;
     }
+
     channel->count++;
 }
 
