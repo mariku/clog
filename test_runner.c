@@ -3,6 +3,7 @@
 #include "unittest.h"
 
 /* test functions declarations */
+char* test_test____________test(void);
 char* test_read_empty(void);
 char* test_read_full(void);
 char* test_read_1_element(void);
@@ -14,11 +15,22 @@ char* test_write_full(void);
 char* test_write_empty(void);
 
 
-extern int test_run = 0;
+int test_run = 0;
 
 /* execute all tests */
 static char * all_tests() {
     char* msg;
+
+    printf("starting test test_test____________test\n");
+    test_run++;
+    msg = test_test____________test();
+    if(msg) {
+        printf("finished test test_test____________test FAILED\n");
+        return msg;
+    }
+    else{
+        printf("finished test test_test____________test SUCCEDED\n");
+    }
 
     printf("starting test test_read_empty\n");
     test_run++;

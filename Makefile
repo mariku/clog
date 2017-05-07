@@ -6,8 +6,7 @@ clean:
 	rm -rf test
 
 unit_tests: logging.c buffer_test.c logging.h
-	doxygen
-	python3 create_test_runner.py generate --input-file xml/index.xml --output-file test_runner.c
+	python3 create_test_runner.py generate --output-file test_runner.c --doxygen-dir doxy buffer_test.c
 	clang -g test_runner.c logging.c buffer_test.c -DLOGGING=1 -o $@
 
 

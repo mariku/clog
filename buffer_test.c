@@ -2,6 +2,12 @@
 #include "logging.h"
 
 /*****************************************************************************/
+char* test_test____________test() {
+    LogChannel c;
+
+
+    return 0;
+}
 
 char* test_read_empty() {
     LogChannel c;
