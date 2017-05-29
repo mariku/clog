@@ -5,8 +5,7 @@
 char* test_test____________test() {
     LogChannel c;
 
-
-    return 0;
+    return "test failed\n";
 }
 
 char* test_read_empty() {
