@@ -17,6 +17,7 @@ def cli():
 #------------------------------------------------------------------------------
 
 INTERNAL_ID = 0
+LOST_MESSAGE_ID = 0
 
 tlog = logging.getLogger("Target")
 
@@ -40,16 +41,16 @@ class IgnoreLine(Exception):
 
 
 @cli.command()
-@click.option('-o', '--output-dir', required=True, type=Path)
+@click.option('-o', '--output-file', required=True, type=Path)
 @click.option('-I', '--include-path', multiple=True)
 @click.option('-D', '--defines', multiple=True)
 @click.argument('files', nargs=-1)
-def find_logs(output_dir, include_path, defines, files):
-    logging.info("find_logs: output_dir: %s"
+def find_logs(output_file, include_path, defines, files):
+    logging.info("find_logs: output_file: %s"
                  " include_path: %s"
                  " defines: %s"
                  " files: %s",
-                 output_dir, include_path, defines, files)
+                 output_file, include_path, defines, files)
     result = {'channels': [],
               'messages': []}
     for f in files:
@@ -59,7 +60,11 @@ def find_logs(output_dir, include_path, defines, files):
             result['channels'].append({'file': f, 'name': c})
         for l in log_lines:
             result['messages'].append(l._asdict())
-    with (output_dir / 'logs.json').open('w') as f:
+    try:
+        output_file.parent.mkdir(parents=True)
+    except FileExistsError:
+        pass
+    with output_file.open('w') as f:
         json.dump(result, f, indent=4)
 
 #------------------------------------------------------------------------------
@@ -91,7 +96,6 @@ def parse_cpp_result(cpp_result):
             elif type_ in ["debug"]:
                 channel, line, rest = data.split(',', 2)
                 line = int(line)
-                print(rest)
                 parsed_rest = rest_pattern.match(rest)
                 if parsed_rest:
                     msg = parsed_rest.group(1)
@@ -134,7 +138,29 @@ def get_dictionary(input_file):
 
 
 def convert_msg(d, line):
-    channel_id, line, parameter = parse_line(line)
+    channel_id, line_number, parameter = parse_line(line)
+    if channel_id == INTERNAL_ID:
+        _convert_internal_msg(d, line_number, parameter)
+    else:
+        _convert_msg(d, line, channel_id, line_number, parameter)
+
+#------------------------------------------------------------------------------
+
+
+def _convert_internal_msg(d, id_, parameter):
+    if id_ == LOST_MESSAGE_ID:
+        channel_id = int(parameter[0])
+        channel = d['channels'][channel_id - 1]
+        number_of_lost_messages = int(parameter[1])
+        tlog.warn("Messages lost: channel: %s, number of messages: %d",
+                  channel, number_of_lost_messages)
+    else:
+        logging.warn("Unknown interal id: %s", id_)
+
+#------------------------------------------------------------------------------
+
+
+def _convert_msg(d, line, channel_id, line_number, parameter):
     try:
         channel = d['channels'][channel_id - 1]
     except IndexError:
@@ -143,7 +169,7 @@ def convert_msg(d, line):
     try:
         message = [m for m in d['messages']
                    if m['channel'] == channel['name']
-                   if m['line'] == line][0]
+                   if m['line'] == line_number][0]
     except IndexError:
         logging.warn("Unkown msg: channel: %s line: %s",
                      channel, line)
@@ -159,14 +185,14 @@ def parse_line(line):
         cid, line, *parameter = line.split(',')
         return int(cid), int(line), parameter
     except Exception as e:
-        logging.info("Failed to parse line: %s exception: %s",
+        logging.info("Failed to parse line: '%s' exception: %s",
                      line, e)
         raise IgnoreLine
 
 #------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     cli()
 
 #------------------------------------------------------------------------------

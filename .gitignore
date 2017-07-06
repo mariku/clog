@@ -1,5 +1,6 @@
 test
 doxy
 unit_tests
-component_tests
+component_test
+tests
 
