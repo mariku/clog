@@ -5,6 +5,7 @@ import subprocess
 import re
 from simplestruct import Struct, Field
 from pathlib import Path
+import jinja2
 
 #------------------------------------------------------------------------------
 
@@ -65,6 +66,44 @@ def find_logs(output_file, include_path, defines, files):
         pass
     with output_file.open('w') as f:
         json.dump(result, f, indent=4)
+
+#------------------------------------------------------------------------------
+
+
+@cli.command()
+@click.option('-o', '--output-dir', required=True, type=Path)
+@click.option('-i', '--input-file', required=True, type=Path)
+def generate(output_dir, input_file):
+    d = get_dictionary(input_file)
+    channels = d['channels']
+    for id_, c in enumerate(channels, 1):
+        c['id'] = id_
+    h_template = jinja2.Template("""#include <logging.h>
+
+{%for c in channels -%}
+extern LogChannel {{c.name}};
+{% endfor %}
+""")
+    c_template = jinja2.Template("""
+#include <logging_gen.h>
+
+void Logging_init_all() {
+{%- for c in channels %}
+    Logging_init(&{{c.name}}, {{c.id}});
+{%- endfor %}
+}
+
+void Logging_dump_all() {
+{%- for c in channels %}
+    Logging_dump(&{{c.name}});
+{%- endfor %}
+}
+    """)
+    with (output_dir / 'logging_gen.h').open('w') as f:
+        f.write(h_template.render(channels=channels))
+    with (output_dir / 'logging_gen.c').open('w') as f:
+        f.write(c_template.render(channels=channels))
+
 
 #------------------------------------------------------------------------------
 
@@ -132,12 +171,18 @@ def convert(input_file, executable):
             convert_msg(d, line)
         except IgnoreLine:
             pass
+    for line in p.stdout.readlines():
+        line = line.strip()
+        try:
+            convert_msg(d, line)
+        except IgnoreLine:
+            pass
 
 #------------------------------------------------------------------------------
 
 
 def get_dictionary(input_file):
-    with open(input_file) as f:
+    with open(str(input_file)) as f:
         return json.load(f)
 
 #------------------------------------------------------------------------------
