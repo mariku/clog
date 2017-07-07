@@ -3,4 +3,7 @@ doxy
 unit_tests
 component_test
 tests
+logging_gen.h
+logging_gen.c
+tests.json
 

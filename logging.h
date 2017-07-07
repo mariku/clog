@@ -33,6 +33,9 @@ void Logging_lost_callback(int channel_id, int lost);
 
 void Logging_dump(LogChannel* channel);
 
+void Logging_init_all();
+void Logging_dump_all();
+
 /* create channel */
 #define LOGGING_CREATE_CHANNEL(name) LogChannel name;
 
