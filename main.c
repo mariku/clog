@@ -20,8 +20,10 @@ void Logging_init_all() {
 int main()
 {
     Logging_init_all();
-    do_foo();
-    Logging_dump_all();
+    while(1) {
+        do_foo();
+        Logging_dump_all();
+    }
     printf("Empty dump\n");
     Logging_dump_all();
 }

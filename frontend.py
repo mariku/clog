@@ -1,7 +1,6 @@
 import json
 import logging
 import click
-import sys
 import subprocess
 import re
 from simplestruct import Struct, Field
@@ -117,10 +116,17 @@ def parse_cpp_result(cpp_result):
 
 @cli.command()
 @click.option('--input-file')
-def convert(input_file):
+@click.option('--executable')
+def convert(input_file, executable):
     # todo use classes
     d = get_dictionary(input_file)
-    for line in sys.stdin.readlines():
+    p = subprocess.Popen(args=executable,
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         universal_newlines=True)
+
+    while p.poll() is None:
+        line = p.stdout.readline()
         line = line.strip()
         try:
             convert_msg(d, line)
